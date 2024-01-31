@@ -1,17 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { Chapter2Module } from './chapter2/chapter2.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import Post from './chapter2/entities/chapter2.entity';
+import Post from './post/entities/post.entity';
 import { User } from './users/entities/user.entity';
+import Address from './users/entities/address.entity';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/guard';
+import { PostModule } from './post/post.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
-    Chapter2Module,
     TypeOrmModule.forRoot({
       type: 'postgres', // 数据库类型
       host: 'localhost', // 数据库主机
@@ -19,12 +20,14 @@ import { AuthGuard } from './auth/guard';
       username: 'myuser', // 数据库用户名
       password: 'mysecretpassword', // 数据库密码
       database: 'mydatabase', // 数据库名称
-      entities: [Post, User], // 实体类数组
+      entities: [Post, User, Address], // 实体类数组
       synchronize: true, // 自动创建表结构（仅用于开发环境）
     }),
-    TypeOrmModule.forFeature([Post, User]),
+    TypeOrmModule.forFeature([Post, User, Address]),
     UsersModule,
-    AuthModule, // 导入实体类
+    AuthModule,
+    PostModule,
+    RoleModule, // 导入实体类
   ],
   controllers: [AppController],
   providers: [

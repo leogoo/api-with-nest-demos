@@ -17,7 +17,7 @@ export class AuthService {
       password,
       user.password,
     );
-    if (isPasswordMatching) {
+    if (!isPasswordMatching) {
       throw new UnauthorizedException();
     }
     const { password: pass, ...payload } = user || {};
