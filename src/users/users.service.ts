@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import Address from './entities/address.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/role/entities/role.entity';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +15,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Address)
     private readonly addressRepository: Repository<Address>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
   ) {}
 
   async createAddress(createAddressDto: CreateAddressDto) {
@@ -73,5 +76,26 @@ export class UsersService {
 
   removeAll() {
     return this.usersRepository.delete({});
+  }
+
+  async addRole(addRoleDto: { userId: number, roleId: number }) {
+    const { userId, roleId, } = addRoleDto || {};
+    const user = await this.usersRepository.findOne({
+      where: {
+        id: +userId
+      },
+      // 需要指定relations，否则user不会带上roles属性
+      relations: ['roles']
+    });
+    const role = await this.roleRepository.findOne({
+      where: {
+        id: +roleId
+      }
+    });
+    const newUser = await this.usersRepository.save({
+      ...user,
+      roles: [...user?.roles, role]
+    });
+    return newUser;
   }
 }

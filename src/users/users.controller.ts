@@ -32,4 +32,9 @@ export class UsersController {
   list() {
     return this.usersService.findAll();
   }
+
+  @Post('addRole')
+  addRole(@Body() addRoleDto: { userId: number, roleId: number }) {
+    return this.usersService.addRole(addRoleDto);
+  }
 }

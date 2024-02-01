@@ -1,7 +1,8 @@
 
-import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany, ManyToMany, JoinTable} from 'typeorm';
 import Address from './address.entity';
 import Post from '../../post/entities/post.entity'
+import { Role } from 'src/role/entities/role.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -27,4 +28,8 @@ export class User {
   // post.author 表示关联的是 Post 实体中的 author 属性
   @OneToMany(() => Post, (post: Post) => post.author)
   public posts: Post[];
+
+  @ManyToMany(() => Role, (role: Role) => role.users)
+  @JoinTable()
+  public roles: Role[];
 }
