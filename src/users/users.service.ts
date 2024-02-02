@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectRepository, InjectEntityManager } from '@nestjs/typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { User } from './entities/user.entity';
 import Address from './entities/address.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
@@ -17,6 +17,8 @@ export class UsersService {
     private readonly addressRepository: Repository<Address>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectEntityManager()
+    private readonly entityManager: EntityManager,
   ) {}
 
   async createAddress(createAddressDto: CreateAddressDto) {
@@ -25,13 +27,30 @@ export class UsersService {
     return newAddress;
   }
 
-  async create(createUserDto: CreateUserDto & { address: any }) {
+  async create(createUserDto: CreateUserDto) {
     try {
       const newUser = await this.usersRepository.create(createUserDto);
       await this.usersRepository.save(newUser);
       return newUser;
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  async createByTransaction(createUserDto: CreateUserDto) {
+    try {
+      await this.entityManager.transaction(async (entityManager) => {
+        // 事务操作
+        await entityManager.save(User, createUserDto);
+        const role = await this.entityManager.findOne(Role, {
+          where: {
+            id: 1
+          }
+        });
+        await entityManager.remove(Role, role);
+      })
+    } catch (err) {
+      console.log("createByTransaction", err);
     }
   }
   
@@ -97,5 +116,25 @@ export class UsersService {
       roles: [...user?.roles, role]
     });
     return newUser;
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.usersRepository.update(userId, {
+      currentHashedRefreshToken
+    });
+  }
+
+  // refreshToken是否一致
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.detail(userId);
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
   }
 }

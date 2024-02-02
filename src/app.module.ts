@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import Post from './post/entities/post.entity';
 import { User } from './users/entities/user.entity';
@@ -11,9 +12,18 @@ import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/guard';
 import { PostModule } from './post/post.module';
 import { RoleModule } from './role/role.module';
+import * as Joi from '@hapi/joi';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      validationSchema: Joi.object({
+        JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
+        JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+      })
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres', // 数据库类型
       host: 'localhost', // 数据库主机

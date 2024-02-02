@@ -13,6 +13,11 @@ export class UsersController {
     return this.usersService.register(createUserDto);
   }
 
+  @Post('add')
+  add(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.createByTransaction(createUserDto);
+  }
+
   @Get('delete/:id')
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.delete(id);

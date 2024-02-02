@@ -24,4 +24,12 @@ export class PostService {
   findAll() {
     return this.postRepository.find({ relations: ['author'] });
   }
+
+  findByTitle(title: string): Promise<Post | null>  {
+    return this.postRepository.findOne({ 
+      where: {
+        title
+      }
+    });
+  }
 }

@@ -1,5 +1,6 @@
 
 import { Column, Entity, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany, ManyToMany, JoinTable} from 'typeorm';
+import { Exclude } from 'class-transformer';
 import Address from './address.entity';
 import Post from '../../post/entities/post.entity'
 import { Role } from 'src/role/entities/role.entity';
@@ -32,4 +33,10 @@ export class User {
   @ManyToMany(() => Role, (role: Role) => role.users)
   @JoinTable()
   public roles: Role[];
+
+  @Column({
+    nullable: true
+  })
+  @Exclude() // 序列化时会过滤掉属性
+  public currentHashedRefreshToken?: string;
 }

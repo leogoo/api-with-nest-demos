@@ -16,4 +16,9 @@ export class PostController {
   findAll() {
     return this.postService.findAll();
   }
+
+  @Get('byTitle/:title')
+  searchByTitle(@Param('title') title: string) {
+    return this.postService.findByTitle(title);
+  }
 }
