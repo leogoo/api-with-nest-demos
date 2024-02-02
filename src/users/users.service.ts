@@ -89,8 +89,19 @@ export class UsersService {
     return user;
   }
 
-  findAll() {
-    return this.usersRepository.find({ relations: ['address', 'posts'] });
+  async findAll({ offset, limit }: { offset: number, limit: number }) {
+    const [items, count] = await this.usersRepository.findAndCount({
+      relations: ['address', 'posts'],
+      order: {
+        id: 'ASC'
+      },
+      skip: offset,
+      take: limit
+    });
+    return {
+      items,
+      count
+    }
   }
 
   removeAll() {

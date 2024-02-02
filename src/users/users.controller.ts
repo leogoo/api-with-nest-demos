@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateAddressDto } from './dto/create-address.dto';
@@ -34,8 +34,8 @@ export class UsersController {
   }
 
   @Get('List')
-  list() {
-    return this.usersService.findAll();
+  list(@Query() { offset, limit }: { offset: number, limit: number }) {
+    return this.usersService.findAll({ offset, limit });
   }
 
   @Post('addRole')
