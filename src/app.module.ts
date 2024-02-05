@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/guard';
 import { PostModule } from './post/post.module';
 import { RoleModule } from './role/role.module';
+import { GrpcClientModule } from './grpc-client/grpc-client.module';
 import * as Joi from '@hapi/joi';
 
 @Module({
@@ -38,7 +39,8 @@ import * as Joi from '@hapi/joi';
     UsersModule,
     AuthModule,
     PostModule,
-    RoleModule, // 导入实体类
+    RoleModule,
+    GrpcClientModule, // 导入实体类
   ],
   controllers: [AppController],
   providers: [
