@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import Post from './post/entities/post.entity';
 import { User } from './users/entities/user.entity';
@@ -14,9 +14,32 @@ import { PostModule } from './post/post.module';
 import { RoleModule } from './role/role.module';
 import { GrpcClientModule } from './grpc-client/grpc-client.module';
 import * as Joi from '@hapi/joi';
+import { CacheModule, CacheInterceptor, CacheStore } from '@nestjs/cache-manager';
+import type { RedisClientOptions } from 'redis';
+import { redisStore } from 'cache-manager-redis-store';
+import { APP_INTERCEPTOR } from '@nestjs/core'
+import { CronModule } from './cron/cron.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
+    CacheModule.registerAsync<RedisClientOptions>({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const store = await redisStore({
+          socket: {
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
+          },
+        })
+        return {
+          store: store as unknown as CacheStore,
+        }
+      },
+      isGlobal: true,
+    }),
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
@@ -40,7 +63,8 @@ import * as Joi from '@hapi/joi';
     AuthModule,
     PostModule,
     RoleModule,
-    GrpcClientModule, // 导入实体类
+    GrpcClientModule,
+    CronModule,
   ],
   controllers: [AppController],
   providers: [
@@ -49,6 +73,10 @@ import * as Joi from '@hapi/joi';
       provide: 'USER_AUTH',
       useClass: AuthGuard,
     },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: CacheInterceptor,
+    // },
   ],
 })
 export class AppModule {}

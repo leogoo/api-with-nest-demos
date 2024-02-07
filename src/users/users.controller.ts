@@ -1,12 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query, Inject } from '@nestjs/common';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateAddressDto } from './dto/create-address.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache
+  ) {}
 
   @Post('create')
   create(@Body() createUserDto: CreateUserDto) {
@@ -33,9 +36,18 @@ export class UsersController {
     return this.usersService.detail(id);
   }
 
-  @Get('List')
-  list(@Query() { offset, limit }: { offset: number, limit: number }) {
-    return this.usersService.findAll({ offset, limit });
+  @Get('list')
+  async list(@Query() { offset, limit }: { offset: number, limit: number }) {
+    const keys = await this.cacheManager.store.keys();
+    console.log("cache keys", keys)
+    const listFromCache = await this.cacheManager.get('useList');
+    if (listFromCache) {
+      return listFromCache;
+    }
+
+    const list = await this.usersService.findAll({ offset, limit });
+    await this.cacheManager.set('useList', list, 10000);
+    return list;
   }
 
   @Post('addRole')
