@@ -20,6 +20,7 @@ import { redisStore } from 'cache-manager-redis-store';
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { CronModule } from './cron/cron.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { ScheduleModule } from '@nestjs/schedule';
   ],
   controllers: [AppController],
   providers: [
+    ChatGateway,
     AppService,
     {
       provide: 'USER_AUTH',

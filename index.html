@@ -1,0 +1,21 @@
+<html>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.2.0/dist/socket.io.js"></script>
+    <script>
+      const socket = io('ws://localhost:3000');
+
+      socket.on('connect', () => {
+        console.log('Connected to WebSocket server');
+        socket.emit('clientMessage', 'Hello server');
+      });
+
+      socket.on('message', (data) => {
+        console.log('Received message from server:', data);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected from WebSocket server');
+      });
+    </script>
+  </body>
+</html>
