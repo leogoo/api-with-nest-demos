@@ -17,13 +17,20 @@ import * as Joi from '@hapi/joi';
 import { CacheModule, CacheInterceptor, CacheStore } from '@nestjs/cache-manager';
 import type { RedisClientOptions } from 'redis';
 import { redisStore } from 'cache-manager-redis-store';
-import { APP_INTERCEPTOR } from '@nestjs/core'
 import { CronModule } from './cron/cron.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ChatGateway } from './chat/chat.gateway';
-
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 @Module({
   imports: [
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      // playground: false,
+      // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: true,
+      sortSchema: true,
+    }),
     ScheduleModule.forRoot(),
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],

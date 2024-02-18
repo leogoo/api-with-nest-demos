@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GraphQL Client HTML Example</title>
+</head>
+<body>
+  <div id="result"></div>
+
+  <script>
+    // 定义 GraphQL 查询
+    const query = `
+      query {
+        posts {
+          id,
+          title
+        }
+      }
+    `;
+    
+    // 定义请求的 URL
+    const url = 'http://localhost:3000/graphql';  // 替换为实际的服务端 GraphQL 端点地址
+    
+    // 发送 GraphQL 请求
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      // 处理服务器响应
+      const resultElement = document.getElementById('result');
+      resultElement.textContent = data.data.sayHello;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  </script>
+</body>
+</html>
